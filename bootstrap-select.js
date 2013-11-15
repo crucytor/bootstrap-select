@@ -273,6 +273,44 @@
             this.$newElement.data('liHeight', liHeight).data('headerHeight', headerHeight).data('searchHeight', searchHeight);
         },
 
+        // functionality used from https://github.com/gfranko/jquery.selectBoxIt.js/blob/master/src/javascripts/jquery.selectBoxIt.js
+        scrollToView: function() {
+            var $innerMenu     = this.$menu.find('.inner'),
+                $currentOption = $innerMenu.find('li.selected:first'),
+
+                // The current scroll position of the dropdown list options list
+                listScrollTop = $innerMenu.scrollTop(),
+
+                // The height of the currently selected dropdown list option
+                currentItemHeight = $currentOption.height(),
+
+                // The relative distance from the currently selected dropdown list option
+                // to the the top of the dropdown list options list
+                currentTopPosition = $currentOption.position().top,
+
+                absCurrentTopPosition = Math.abs(currentTopPosition),
+
+                // The height of the dropdown list option list
+                listHeight = $innerMenu.height(),
+
+                currentText;
+
+            // Increases the dropdown list options `scrollTop` if a user is searching for an option
+            // below the currently selected option that is not visible
+            if (listHeight - currentTopPosition < currentItemHeight) {
+
+                // The selected option will be shown at the very bottom of the visible options list
+                $innerMenu.scrollTop(listScrollTop + (currentTopPosition - (listHeight - currentItemHeight)));
+            }
+
+            // Decreases the dropdown list options `scrollTop`
+            // if a user is searching for an option above
+            // the currently selected option that is not visible
+            else if (currentTopPosition < -1) {
+                $innerMenu.scrollTop(currentTopPosition - currentItemHeight);
+            }
+        },
+        
         setSize: function() {
             var that = this,
                 menu = this.$menu,
@@ -375,6 +413,10 @@
                 $drop.appendTo(that.options.container);
                 $drop.toggleClass('open', !$(this).hasClass('open'));
                 $drop.append(that.$menu);
+                
+                if (true === $drop.hasClass('open')) {
+                   that.scrollToView();
+                }
             });
             $(window).resize(function() {
                 getPlacement(that.$newElement);
